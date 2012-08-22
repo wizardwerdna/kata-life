@@ -19,10 +19,12 @@ class Cell
 
   def neighboring_birth
     self.live_neighbors += 1
+    world.had_updated_neighbor(self)
   end
 
   def neighboring_death
     self.live_neighbors -= 1
+    world.had_updated_neighbor(self)
   end
 
   def update

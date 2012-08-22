@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require_relative 'life'
+require_relative 'toroid'
 
 def timeForTick(world)
   start = Time.now
@@ -8,7 +9,7 @@ def timeForTick(world)
 end
 
 def initializeWorld
-  world = World.new(60, 60)
+  world = ToroidalWorld.new(60, 250)
   world.cells.each do |cell|
     cell.future = [LiveCell, DeadCell].shuffle.first
     cell.update

@@ -1,10 +1,11 @@
 require_relative '../cell'
 
 describe Cell do
-  let(:world){ double "world" }
+  let(:world){ double "world", :had_updated_neighbor => nil }
   let(:y){ 8 }
   let(:x){ 5 } 
   let(:cell){ Cell.new(x, y, world) }
+
   context "when first created" do
     it "should have the correct coordinates and world" do
       cell.x.should == x
@@ -24,9 +25,11 @@ describe Cell do
       cell.future.should == future_value
     end
     it "should be able to recognize a neighboring birth" do
+      cell.world.should_receive(:had_updated_neighbor).with(cell)
       ->{cell.neighboring_birth}.should change{cell.live_neighbors}.by(1)
     end
     it "should be able to recognize a neighboring death" do
+      cell.world.should_receive(:had_updated_neighbor).with(cell)
       ->{cell.neighboring_death}.should change{cell.live_neighbors}.by(-1)
     end
   end
@@ -36,7 +39,7 @@ describe Cell do
     let(:present_value){double "present value"}
     let(:future_value){double "future value"}
     let(:neighbor){double "neighbor"} 
-  
+
     it "should set value to future" do
       cell.value = present_value
       cell.future = future_value

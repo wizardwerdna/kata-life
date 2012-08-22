@@ -48,4 +48,3 @@ describe DeadCell do
   end
 
 end
-

@@ -1,5 +1,7 @@
 class Cell
+
   attr_accessor :x, :y, :world, :value, :neighbors, :live_neighbors, :future
+
   def initialize x, y, world
     self.x = x
     self.y = y
@@ -7,10 +9,6 @@ class Cell
     self.value = DeadCell
     self.neighbors = []
     self.live_neighbors = 0
-  end
-
-  def alive?
-    LiveCell == value
   end
 
   def next_future

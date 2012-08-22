@@ -21,12 +21,13 @@ class World
   end
 
   def tick!
-    new_cells = Array(cells_with_updated_neighbors)
+    new_cells = Array(cells_with_updated_neighbors).clone
     self.cells_with_updated_neighbors = Set.new
     
     new_cells.each do |cell| 
       cell.next_future
     end
+
     new_cells.each{|cell| cell.update}
   end
 

@@ -7,7 +7,7 @@ describe Toroid do
 
   it { world.rows.should have(height).items } 
 
-  it "should have all the rows and cells" do
+  it "should instantiate and install specified rows and cells" do
     world.rows.each do |row|
       row.each do |cell|
         cell.should be_kind_of Cell

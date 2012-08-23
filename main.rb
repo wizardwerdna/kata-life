@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require_relative 'life'
 require_relative 'toroid'
+require_relative 'life_file_reader'
 
 class DisplayThrottler
 
@@ -59,42 +60,35 @@ private
  
 end
 
-
 def time_for_tick(world)
   start = Time.now
   world.tick!
   Time.now - start
 end
 
-def set_cell cell, value
-  return if cell.value == value
-  if value == DeadCell
-    DeathFutureStrategy.new(cell).run
-  else
-    BirthFutureStrategy.new(cell).run
-  end
-end
-
 def initialize_world
   world = ToroidalWorld.new(`tput lines`.to_i-4, `tput cols`.to_i)
-  world.cells.each do |cell|
-    set_cell cell, [DeadCell, LiveCell].sample
- end
- world
+  LifeFileReader.new(world).load_stdin
+  world
 end
 
 def clear_screen
-  `tput reset; tput clear`
+  puts "\033[H"
+  puts `clear`
+  puts `tput reset`
+  puts `tput clear`
 end
 
 def display(world)
   puts "\033[H" + world.to_s + "\n"
 end
 
-def main
-  clear_screen
+ def main
   display_throttler =  DisplayThrottler.new (ARGV[0] || 10).to_i
-  world = initialize_world 
+  clear_screen
+  world = initialize_world
+  sleep 2 
+  clear_screen
   ticks = time_for_ticks = 0
   while true do
     start = Time.now

@@ -4,7 +4,8 @@ require_relative 'life'
 require 'ostruct'
 
 class LifeFileReader
-  attr_accessor :world, :x_center, :y_center, :x_loc, :y_loc, :x_current, :y_current, :file_line_number, :file_line
+  attr_accessor :world, :x_center, :y_center, :x_loc, :y_loc, :x_current, 
+    :y_current, :file_line_number, :file_line
 
   def initialize world
     self.world = world
@@ -19,24 +20,28 @@ class LifeFileReader
     STDIN.each do |line|
       self.file_line_number += 1
       self.file_line = line
-      case line 
-      when /^[Rr][Aa][Nn][Dd][Oo][Mm]/
-        set_random_screen
-      when /^#D (.*)$/
-        puts "################ #{$1}"
-      when /^#P +(\-?[0-9]+) +(\-?[0-9]+)/
-        establish_new_origin $1.to_i, $2.to_i
-      when /^([.xXoO*]+)/
-        set_cells $1
-      when /^#Life/, /^#D/, /^#N/
-        # just ignore these lines
-      else
-        raise ">>>>>>> ERROR: " + line
-      end
+      parse line
     end
   end
 
 private
+
+  def parse line
+    case line 
+    when /^[Rr][Aa][Nn][Dd][Oo][Mm]/
+      set_random_screen
+    when /^#D (.*)$/
+      puts "################ #{$1}"
+    when /^#P +(\-?[0-9]+) +(\-?[0-9]+)/
+      establish_new_origin $1.to_i, $2.to_i
+    when /^([.xXoO*]+)/
+      set_cells_from_ascii_art $1  
+    when /^#Life/, /^#D/, /^#N/
+      # just ignore these lines
+    else
+      raise ">>>>>>> ERROR: " + line
+    end
+  end
 
   def set_cell cell, value
     return if cell.value == value
@@ -67,8 +72,8 @@ private
     self.y_current = self.y_loc = y_origin 
   end
 
-  def set_cells specification
-    specification.each_char do |next_cell_char|
+  def set_cells_from_ascii_art line
+    line.each_char do |next_cell_char|
       if next_cell_char == "."
         set_pixel x_current + x_center, y_current + y_center, DeadCell
       else

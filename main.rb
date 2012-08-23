@@ -2,6 +2,64 @@
 require_relative 'life'
 require_relative 'toroid'
 
+class DisplayThrottler
+
+  attr_accessor :framerate
+
+  def initialize framerate
+    @framerate = framerate
+    @last_throttle_time = Time.now
+    @ticks_left_until_odd_throttle = 13 
+  end
+ 
+  def throttle
+    sleep_and_return [time_left_for_this_frame, odd_throttle_delay].max
+  end
+
+
+private
+
+  def time_left_for_this_frame
+    time_allotted_per_frame - time_since_last_frame
+  end
+
+  def time_allotted_per_frame
+    @time_allotted_per_frame ||= compute_time_allotted_per_frame 
+  end
+
+  def time_since_last_frame
+    time = Time.now - @last_throttle_time
+    @last_throttle_time = Time.now
+    time
+  end
+
+
+  def compute_time_allotted_per_frame
+    if framerate <= 0
+      0.0
+    else
+      1.0/framerate
+    end
+  end
+
+  def sleep_and_return delay 
+    sleep delay
+    delay
+  end
+
+  def odd_throttle_delay
+    @ticks_left_until_odd_throttle -= 1
+    if @ticks_left_until_odd_throttle <= 0 
+      @ticks_left_until_odd_throttle = 13 
+      0.01
+    else
+      0
+    end
+  end 
+ 
+end
+
+
 def time_for_tick(world)
   start = Time.now
   world.tick!
@@ -33,47 +91,18 @@ def display(world)
   puts "\033[H" + world.to_s + "\n"
 end
 
-def sleep_and_return delay 
-  sleep delay
-  delay
-end
-
-def odd_throttle_delay
-  @ticks_for_odd_throttle ||= 1 
-  @ticks_for_odd_throttle -= 1
-  if @ticks_for_odd_throttle <= 0
-    @ticks_for_odd_throttle = 13 
-    sleep_and_return 0.01
-  else
-    0
-  end
-end 
-
-def throttle(framerate)
-  if framerate <= 0
-    sleep_and_return 0 
-  else
-    @start ||= Time.now
-    time_left_for_frame = (1.0/framerate) - (Time.now-@start)
-    @start = Time.now
-    delay = [time_left_for_frame, odd_throttle_delay].max
-    sleep_and_return delay
-  end
-end
-
 def main
   clear_screen
-  framerate = (ARGV[0] || 10).to_i
+  display_throttler =  DisplayThrottler.new (ARGV[0] || 10).to_i
   world = initialize_world 
   ticks = time_for_ticks = 0
-  time_per_frame = 1.0 / framerate
   while true do
     start = Time.now
     display(world)
     printf "%10ith iterations\n", ticks+=1
     printf "%10.04g ticks per second\n", ticks / (time_for_ticks + 0.000001)
     time_for_ticks += time_for_tick(world)
-    printf "throttling %10.04g seconds\n", throttle(framerate) 
+    printf "throttling %10.04g seconds\n", display_throttler.throttle 
   end
 end
 

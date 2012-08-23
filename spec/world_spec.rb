@@ -35,11 +35,12 @@ describe World do
 
     before :each do
       cell.value = stub(:future => nil)
-      cell.future = stub
+      cell.future = stub(:run => nil)
       world.cells_with_updated_neighbors = Set.new [cell] 
     end
 
-    it "cells with updated neighbors should be asked to compute their future" do
+    it "cells having updated neighbors should be asked to plan their future" do
+      # cells without updated neighbors will be unchanged next generation
       cell.should_receive(:next_future)
       world.tick!
     end

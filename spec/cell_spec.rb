@@ -41,46 +41,35 @@ describe Cell do
     end
   end
 
-  it "should be able to recognize a neighboring birth" do
-    cell.world.should_receive(:had_updated_neighbor).with(cell)
-    ->{cell.neighboring_birth}.should change{cell.live_neighbors}.by(1)
+  context "when answering #change_value_and_notify_neighbors" do
+    let(:value){ double "value" }
+    let(:change){ double "change" }
+    let(:neighbors){ 8.times.map{|n| double "neighbor #{n}"} }
+
+
+    it "should change value correctly" do
+      cell.change_value_and_notify_neighbors value, change
+      cell.value.should == value
+    end  
+
+    it "should update neighbors correctly" do
+      neighbors.each{|n| n.should_receive(:neighboring_change).with change}
+      cell.neighbors = neighbors
+      cell.change_value_and_notify_neighbors value, change
+    end
   end
 
-  it "should be able to recognize a neighboring death" do
-    cell.world.should_receive(:had_updated_neighbor).with(cell)
-    ->{cell.neighboring_death}.should change{cell.live_neighbors}.by(-1)
-  end
+  context "when answering #neighboring_change" do
 
+    it "should update live_neighbors properly" do
+      ->{cell.neighboring_change(-13)}.should change{cell.live_neighbors}.by -13 
 
-  context "after futures have been computed" do
- 
-    let(:present_value){double "present value"}
-    let(:future_value){double "future value"}
-    let(:neighbor){double "neighbor"} 
-
-    it "should set value to future" do
-      cell.value = present_value
-      cell.future = future_value
-      cell.update.should == future_value
-      cell.value.should == future_value 
     end
 
-    it "should update_neighbors after a death" do
-      cell.value = LiveCell
-      cell.future = DeadCell
-      cell.neighbors = [neighbor]
-      neighbor.should_receive :neighboring_death
-      cell.update
+    it "should notify the world that a neighbor was changed" do
+      cell.world.should_receive(:had_updated_neighbor).with(cell)
+      cell.neighboring_change(-13)
     end
-
-    it "should update_neighbors after a death" do
-      cell.value = LiveCell
-      cell.future = DeadCell
-      cell.neighbors = [neighbor]
-      neighbor.should_receive :neighboring_death
-      cell.update
-    end
-
   end
 
 end

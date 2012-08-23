@@ -15,25 +15,24 @@ class Cell
     self.future = value.future(self)
   end
 
-  def neighboring_birth
-    self.live_neighbors += 1
+  def neighboring_change change
+    self.live_neighbors += change
     world.had_updated_neighbor(self)
   end
 
-  def neighboring_death
-    self.live_neighbors -= 1
-    world.had_updated_neighbor(self)
+  def change_value_and_notify_neighbors value, change
+    self.value = value
+    neighbors.each{|n| n.neighboring_change change} 
   end
 
   def update
-    if future_birth?
-      neighbors.each{|n| n.neighboring_birth}
-    elsif future_death?
-      neighbors.each{|n| n.neighboring_death}
-    end
-    self.value = future
+    future.run
   end
 
+  def to_s
+    "Cell(x:#{x}, y:#{y}, '#{value.to_s}', #{live_neighbors}n, #{future.inspect}"
+  end
+  
 private
 
   def future_birth?

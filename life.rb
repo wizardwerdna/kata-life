@@ -1,3 +1,4 @@
+require_relative 'future_strategy'
 require_relative 'world'
 
 class DeadCell 
@@ -6,9 +7,9 @@ class DeadCell
   
   def self.future cell 
     if cell.live_neighbors == 3
-      LiveCell 
+      BirthFutureStrategy.new(cell) 
     else
-      DeadCell
+      NullFutureStrategy.new(cell) 
     end
   end
 
@@ -20,9 +21,9 @@ class LiveCell
 
   def self.future cell 
     if cell.live_neighbors.between?(2,3)
-      LiveCell
+      NullFutureStrategy.new(cell)
     else
-      DeadCell
+      DeathFutureStrategy.new(cell)
     end
   end
 

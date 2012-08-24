@@ -1,8 +1,3 @@
-#! /usr/bin/env ruby
-require_relative 'toroid'
-require_relative 'life'
-require 'ostruct'
-
 class LifeFileReader
   attr_accessor :world, :x_center, :y_center, :x_loc, :y_loc, :x_current, 
     :y_current, :file_line_number, :file_line
